@@ -12,7 +12,6 @@ Projeto desenvolvido com foco em aprendizado de HTML, CSS e JavaScript (Vanilla 
 - Exibir:
   - Temperatura atual
   - Velocidade do vento
-  - Nome da cidade e país
 - Interface simples e amigável
 - Consumo de API pública
 
@@ -45,7 +44,11 @@ https://open-meteo.com/
 ## 📁 Estrutura do projeto
 clima-facil/
 ├── index.html
-├── style.css
+├──README.md
+├── assets
+└── css
+└── style.css
+├── js
 └── script.js
 
 
