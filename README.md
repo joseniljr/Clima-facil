@@ -2,7 +2,7 @@
 
 Aplicativo web simples que permite pesquisar uma cidade e exibir a temperatura atual e a velocidade do vento em tempo real, utilizando uma API REST pública.
 
-Projeto desenvolvido com foco em aprendizado de HTML, CSS e JavaScript (Vanilla JS).
+Projeto desenvolvido com foco em aprendizado de HTML, CSS e JavaScript.
 
 ---
 
