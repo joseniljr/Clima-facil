@@ -1,119 +1,196 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8">
-  <title>App de Clima</title>
-  <style>
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-      font-family: "Poppins", sans-serif;
-    }
+<meta charset="UTF-8">
+<title>Clima Fácil</title>
 
-    body {
-      height: 100vh;
-      background: linear-gradient(135deg, #4facfe, #00f2fe);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
+<style>
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: "Poppins", sans-serif;
+}
 
-    .card {
-      background: white;
-      padding: 30px;
-      border-radius: 15px;
-      width: 320px;
-      text-align: center;
-      box-shadow: 0 10px 20px rgba(0,0,0,0.2);
-    }
+body {
+  min-height: 100vh;
+  background: linear-gradient(270deg, #0f2027, #203a43, #2c5364);
+  background-size: 600% 600%;
+  animation: gradient 12s ease infinite;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+}
 
-    h1 {
-      margin-bottom: 20px;
-      color: #333;
-    }
+@keyframes gradient {
+  0% {background-position:0% 50%;}
+  50% {background-position:100% 50%;}
+  100% {background-position:0% 50%;}
+}
 
-    input {
-      width: 100%;
-      padding: 10px;
-      border-radius: 8px;
-      border: 1px solid #ccc;
-      margin-bottom: 10px;
-      font-size: 16px;
-    }
+.card {
+  background: rgba(255,255,255,0.15);
+  backdrop-filter: blur(10px);
+  border-radius: 25px;
+  padding: 25px;
+  width: 360px;
+  text-align: center;
+}
 
-    button {
-      width: 100%;
-      padding: 10px;
-      border: none;
-      border-radius: 8px;
-      background: #4facfe;
-      color: white;
-      font-size: 16px;
-      cursor: pointer;
-      transition: 0.3s;
-    }
+.titulo {
+  margin-bottom: 15px;
+  font-size: 24px;
+  font-weight: bold;
+}
 
-    button:hover {
-      background: #00c6fb;
-    }
+input {
+  width: 100%;
+  padding: 12px;
+  border-radius: 12px;
+  border: none;
+  font-size: 16px;
+  margin-bottom: 10px;
+}
 
-    .resultado {
-      margin-top: 20px;
-      color: #333;
-    }
+button {
+  width: 100%;
+  padding: 12px;
+  border-radius: 12px;
+  border: none;
+  background: #00c6ff;
+  color: #000;
+  font-size: 16px;
+  cursor: pointer;
+  transition: 0.3s;
+}
 
-    .temp {
-      font-size: 40px;
-      font-weight: bold;
-    }
-  </style>
+button:hover {
+  transform: scale(1.05);
+  background: #fff;
+}
+
+.resultado {
+  margin-top: 20px;
+  display: none;
+}
+
+.cidade {
+  font-size: 14px;
+  opacity: 0.8;
+  margin-bottom: 5px;
+}
+
+.icone {
+  font-size: 60px;
+}
+
+.temp {
+  font-size: 40px;
+  font-weight: bold;
+}
+
+.previsao {
+  margin-top: 15px;
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 8px;
+}
+
+.dia {
+  background: rgba(255,255,255,0.25);
+  border-radius: 15px;
+  padding: 8px;
+  font-size: 12px;
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+
+  height: 115px;
+}
+</style>
 </head>
+
 <body>
 
-  <div class="card">
-    <h1>🌤️ Clima Agora</h1>
-    <input type="text" id="cidade" placeholder="Digite a cidade">
-    <button onclick="buscarClima()">Buscar Clima</button>
+<div class="card">
 
-    <div class="resultado" id="resultado"></div>
+  <!-- TÍTULO EM CIMA DO INPUT -->
+  <div class="titulo">🌤️ Clima Fácil</div>
+
+  <input type="text" id="cidadeInput" placeholder="Digite a cidade">
+  <button onclick="buscarClima()">Buscar</button>
+
+  <div class="resultado" id="resultado">
+    <div class="cidade" id="nomeCidade"></div>
+    <div id="icone" class="icone"></div>
+    <div class="temp" id="temperatura"></div>
+    <div id="vento"></div>
+
+    <div class="previsao" id="previsao"></div>
   </div>
+</div>
 
-  <script>
-    async function buscarClima() {
-      const cidade = document.getElementById("cidade").value;
+<script>
+async function buscarClima() {
+  const cidade = document.getElementById("cidadeInput").value;
+  if (!cidade) return alert("Digite uma cidade!");
 
-      if (!cidade) {
-        alert("Digite uma cidade!");
-        return;
-      }
+  const geoURL = `https://geocoding-api.open-meteo.com/v1/search?name=${cidade}&count=1&language=pt&format=json`;
+  const geo = await fetch(geoURL).then(r => r.json());
 
-      const geoURL = `https://geocoding-api.open-meteo.com/v1/search?name=${cidade}&count=1&language=pt&format=json`;
-      const geoResponse = await fetch(geoURL);
-      const geoData = await geoResponse.json();
+  if (!geo.results) return alert("Cidade não encontrada!");
 
-      if (!geoData.results) {
-        document.getElementById("resultado").innerHTML = "Cidade não encontrada.";
-        return;
-      }
+  const lat = geo.results[0].latitude;
+  const lon = geo.results[0].longitude;
+  const nomeCidade = geo.results[0].name;
 
-      const lat = geoData.results[0].latitude;
-      const lon = geoData.results[0].longitude;
+  const climaURL = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current_weather=true&daily=temperature_2m_max,temperature_2m_min&timezone=auto`;
+  const clima = await fetch(climaURL).then(r => r.json());
 
-      const climaURL = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current_weather=true`;
-      const climaResponse = await fetch(climaURL);
-      const climaData = await climaResponse.json();
+  document.getElementById("resultado").style.display = "block";
 
-      const temp = climaData.current_weather.temperature;
-      const vento = climaData.current_weather.windspeed;
+  const temp = clima.current_weather.temperature;
+  const vento = clima.current_weather.windspeed;
 
-      document.getElementById("resultado").innerHTML = `
-        <p>${cidade}</p>
-        <p class="temp">${temp}°C</p>
-        <p>💨 Vento: ${vento} km/h</p>
-      `;
-    }
-  </script>
+  document.getElementById("nomeCidade").innerText = nomeCidade;
+  document.getElementById("icone").innerText = iconeClimaPorTemperatura(temp);
+  document.getElementById("temperatura").innerText = `${temp}°C`;
+  document.getElementById("vento").innerText = `Vento: ${vento} km/h`;
+
+  mostrarPrevisao(clima.daily);
+}
+
+function mostrarPrevisao(daily) {
+  const previsao = document.getElementById("previsao");
+  previsao.innerHTML = "";
+
+  for (let i = 0; i < 5; i++) {
+    const dia = new Date(daily.time[i]).toLocaleDateString("pt-BR", { weekday: "short" });
+    const max = daily.temperature_2m_max[i];
+    const min = daily.temperature_2m_min[i];
+
+    previsao.innerHTML += `
+      <div class="dia">
+        <div>${dia}</div>
+        <div>${iconeClimaPorTemperatura(max)}</div>
+        <div><strong>${max}°</strong></div>
+        <div>${min}°</div>
+      </div>
+    `;
+  }
+}
+
+function iconeClimaPorTemperatura(temp) {
+  if (temp <= 10) return "❄️";
+  if (temp <= 18) return "🌧️";
+  if (temp <= 25) return "⛅";
+  if (temp <= 32) return "☀️";
+  return "🔥";
+}
+</script>
 
 </body>
 </html>
